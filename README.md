@@ -12,7 +12,7 @@ MQTT Discovery in Homeassistant ensures easy configuring
 
 ---
 
-![HA](https://github.com/buffedelic/power_meter_esp8266_ssd1306/tree/master/img/ha-dev.png "Homeassistant automatic device configuration")
+![HA](https://github.com/buffedelic/micropython-s0meter/tree/master/img/ha-dev.png "Homeassistant automatic device configuration")
 
 ---
 
