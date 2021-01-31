@@ -143,7 +143,7 @@ def mqtt_setup():
                 'name': "uPower {}".format(sensor.replace('_', ' ')),
                 'state_topic': "{}".format(power_topic[i]),
                 'unique_id': "upower_{}".format(sensor),
-                'device_class': "energy",
+                'device_class': "power",
                 'unit_of_meas': "W",
                 'device': {
                     'name': "uPower",
