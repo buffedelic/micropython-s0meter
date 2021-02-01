@@ -294,20 +294,23 @@ def main():
         # P(w) = (3600 / T(s)) / ppwh
         # watt = (3600 / ((interval_millis / interval_count)) / 1000) or 800
 
+        _tdiff = (total - total_last)
         try:
-            watt_total = (3600000 / (_millis_interval / (total - total_last))) / 1
+            watt_total = (3600000 / (_millis_interval / _tdiff)) / 1
         except ZeroDivisionError:
             watt_total = 0
         total_last = total
 
+        _hdiff = (heater - heater_last)
         try:
-            watt_heater = (3600000 / (_millis_interval / (heater - heater_last))) / 0.8
+            watt_heater = (3600000 / (_millis_interval / _hdiff)) / 0.8
         except ZeroDivisionError:
             watt_heater = 0
         heater_last = heater
 
+        _fdiff = (ftx - ftx_last)
         try:
-            watt_ftx = (3600000 / (_millis_interval / (ftx - ftx_last))) / 1
+            watt_ftx = (3600000 / (_millis_interval / _fdiff)) / 1
         except ZeroDivisionError:
             watt_ftx = 0
         ftx_last = ftx
