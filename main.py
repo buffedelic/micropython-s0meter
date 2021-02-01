@@ -136,7 +136,7 @@ def mqtt_setup():
     debug_print("Setting up devices for MQTT Discovery")
     for i in range(len(power_topic)):
         sensor = power_topic[i].split('/')[2]
-        print(sensor)
+        _sensor = sensor[0].upper() + sensor[1:].replace('_', ' ')
         client.publish(
             "homeassistant/sensor/uPower/upower-{}/config".format(sensor),
             str(json.dumps({
@@ -243,6 +243,7 @@ def initialize_screen(text):
 def main():
     global _ERROR
     first_run = True
+    _error_count = 0
     _millis_last = time.ticks_ms()
     _ERROR = False
     _led.value(0)  # turn on
@@ -263,20 +264,14 @@ def main():
 
     # ####################################
     # ####################################
-    counter_1 = ds2423.DS2423(_ow)
     # Total, None
+    counter_1 = ds2423.DS2423(_ow)
     counter_1.begin(bytearray(b'\x1d\x6c\xec\x0c\x00\x00\x00\x94'))
-    counter_2 = ds2423.DS2423(_ow)
     # Heater, None
+    counter_2 = ds2423.DS2423(_ow)
     counter_2.begin(bytearray(b'\x1d\x00\xfd\x0c\x00\x00\x00\x9b'))
     # ####################################
     # ####################################
-    # global total_last
-    # global heater_last
-    # global ftx_last
-    # global watt_household
-    # global watt_ftx
-    # global watt_heater
 
     clear_screen()
     debug_print("Device testing ok")
@@ -314,7 +309,7 @@ def main():
         try:
             watt_ftx = (3600000 / (_millis_interval / (ftx - ftx_last))) / 1
         except ZeroDivisionError:
-            watt_heater = 0
+            watt_ftx = 0
         ftx_last = ftx
 
         watt_household = watt_total - watt_heater - watt_ftx
@@ -339,7 +334,10 @@ def main():
         if not first_run:
             if _millis_interval >= 62000:
                 # skip publish
-                print("Will not publish! Interval: {}s".format(_millis_interval / 1000))
+                _error_count += 1
+                if _error_count == 5:
+                    _ERROR = true
+                print("Will not publish! Interval: {}s, error count: {}".format((_millis_interval / 1000), _error_count))
             else:
                 try:
                     publish_usage(watt_total, watt_heater, watt_ftx, watt_household)
