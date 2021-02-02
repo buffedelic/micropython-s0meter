@@ -61,6 +61,7 @@ def handle_error():
     while _ERROR:
         _reboot = False
         i = 5
+        initialize_screen("    !!ERROR!!")
         update_screen("ERROR!", "REBOOTING", 50)
         time.sleep(3)
         clear_screen()
@@ -123,7 +124,6 @@ def mqtt_setup():
                              )
 
     client.settimeout = settimeout
-    # client.set_callback(sub_cb)
     client.connect()
 
     power_topic = []
@@ -140,7 +140,7 @@ def mqtt_setup():
         client.publish(
             "homeassistant/sensor/uPower/upower-{}/config".format(sensor),
             str(json.dumps({
-                'name': "uPower {}".format(sensor.replace('_', ' ')),
+                'name': "uPower {}".format(_sensor),
                 'state_topic': "{}".format(power_topic[i]),
                 'unique_id': "upower_{}".format(sensor),
                 'device_class': "power",
@@ -331,6 +331,7 @@ def main():
 
         if not _wlan.isconnected():
             wlan_connect()
+            client.connect()
             # if not _wlan.isconnected():
             #     _ERROR = True
             #     handle_error()
@@ -344,8 +345,10 @@ def main():
             else:
                 try:
                     publish_usage(watt_total, watt_heater, watt_ftx, watt_household)
-                except:
-                    pass
+                except OSError:
+                    wlan_connect()
+                    client.connect()
+                    publish_usage(watt_total, watt_heater, watt_ftx, watt_household)
             if _millis_interval >= 86400000:
                 _rtc.settime('ntp')
         else:
@@ -353,7 +356,7 @@ def main():
         for t in range(0, 30):
             update_screen("", "_", 50)
             time.sleep(0.9)
-            update_screen("", "/", 50)
+            update_screen("", "", 50)
             time.sleep(0.9)
 
 
