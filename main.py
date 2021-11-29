@@ -27,7 +27,7 @@ _I2C_SCL = const(5)
 _ONEWIRE_PIN = const(0)
 
 
-_MQTT_BROKER = "homeassistant"
+_MQTT_BROKER = "192.168.1.219"
 _MQTT_USER = "buff"
 _MQTT_PASSWORD = "mammas"
 _MQTT_PORT = const(1883)
@@ -110,12 +110,14 @@ def initialize_hardware():
 # MQTT functions
 # ##################
 
+
 def settimeout(duration):
     pass
 
 
 def mqtt_setup():
     global client
+    # print(_MQTT_BROKER)
     client = mqtt.MQTTClient(_MQTT_CLIENT,
                              _MQTT_BROKER,
                              port=_MQTT_PORT,
@@ -142,9 +144,11 @@ def mqtt_setup():
             str(json.dumps({
                 'name': "uPower {}".format(_sensor),
                 'state_topic': "{}".format(power_topic[i]),
+                'state_class': 'measurement',
                 'unique_id': "upower_{}".format(sensor),
                 'device_class': "power",
                 'unit_of_meas': "W",
+                'last_reset': '1970-01-01T00:00:00+00:00',
                 'device': {
                     'name': "uPower",
                     'model': "ESP 8266 with RTC and OLED",
@@ -242,10 +246,10 @@ def initialize_screen(text):
 
 def main():
     global _ERROR
+    _ERROR = False
     first_run = True
     _error_count = 0
     _millis_last = time.ticks_ms()
-    _ERROR = False
     _led.value(0)  # turn on
     watt_ftx = 0
     watt_total = 0
@@ -267,7 +271,7 @@ def main():
     # Total, None
     counter_1 = ds2423.DS2423(_ow)
     counter_1.begin(bytearray(b'\x1d\x6c\xec\x0c\x00\x00\x00\x94'))
-    # Heater, None
+    # Heater, FTX
     counter_2 = ds2423.DS2423(_ow)
     counter_2.begin(bytearray(b'\x1d\x00\xfd\x0c\x00\x00\x00\x9b'))
     # ####################################
@@ -340,7 +344,7 @@ def main():
                 # skip publish
                 _error_count += 1
                 if _error_count == 5:
-                    _ERROR = true
+                    _ERROR = True
                 print("Will not publish! Interval: {}s, error count: {}".format((_millis_interval / 1000), _error_count))
             else:
                 try:
